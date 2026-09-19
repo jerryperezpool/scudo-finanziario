@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scudo Finanziario</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <svg class="crest" viewBox="0 0 120 148" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stemma Scudo Finanziario">
+      <defs>
+        <linearGradient id="crestRed" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c62839"/>
+          <stop offset="100%" stop-color="#8f1524"/>
+        </linearGradient>
+        <linearGradient id="crestGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f3d47c"/>
+          <stop offset="100%" stop-color="#c99a2e"/>
+        </linearGradient>
+      </defs>
+      <path d="M60 4 L110 20 L110 62 C110 98 90 122 60 138 C30 122 10 98 10 62 L10 20 Z"
+            fill="url(#crestRed)" stroke="url(#crestGold)" stroke-width="4"/>
+      <path d="M60 12 L102 26 L102 62 C102 93 85 114 60 128 C35 114 18 93 18 62 L18 26 Z"
+            fill="none" stroke="#f3d47c" stroke-width="1.5" opacity="0.6"/>
+      <rect x="52" y="30" width="16" height="76" rx="3" fill="url(#crestGold)"/>
+      <rect x="22" y="60" width="76" height="16" rx="3" fill="url(#crestGold)"/>
+      <circle cx="60" cy="30" r="7" fill="url(#crestGold)"/>
+      <circle cx="60" cy="106" r="7" fill="url(#crestGold)"/>
+      <circle cx="22" cy="68" r="7" fill="url(#crestGold)"/>
+      <circle cx="98" cy="68" r="7" fill="url(#crestGold)"/>
+      <circle cx="60" cy="68" r="11" fill="#8f1524" stroke="url(#crestGold)" stroke-width="2.5"/>
+      <path d="M60 61 L65 66 L60 76 L55 66 Z" fill="url(#crestGold)"/>
+    </svg>
+    <h1>Scudo Finanziario</h1>
+    <p>Non solo un copilota per investire: uno scudo che ti aiuta a capire e ridurre i rischi della tua vita finanziaria.</p>
+  </header>
+
+  <section class="card expense-card">
+    <h2>💶 Gastos diarios</h2>
+    <p class="explain">Anota aquí cada gasto del día. Se guardan solo en este dispositivo, para que puedas volver cada día a llevar la cuenta.</p>
+
+    <form id="expense-form" class="expense-form">
+      <input type="number" id="expenseImporte" min="0" step="0.01" placeholder="Importe (€)" required>
+      <input type="text" id="expenseDescripcion" placeholder="Descripción (ej. Café)" required>
+      <select id="expenseCategoria">
+        <option value="Comida">🍽️ Comida</option>
+        <option value="Transporte">🚌 Transporte</option>
+        <option value="Ocio">🎉 Ocio</option>
+        <option value="Salud">💊 Salud</option>
+        <option value="Casa">🏠 Casa</option>
+        <option value="Otros">📦 Otros</option>
+      </select>
+      <button type="submit">Añadir</button>
+    </form>
+
+    <div class="expense-summary">
+      <div class="expense-total-today">
+        <span class="label">Total de hoy</span>
+        <span class="value" id="expense-today-total">0 €</span>
+      </div>
+    </div>
+
+    <ul id="expense-list" class="expense-list"></ul>
+
+    <div class="expense-history">
+      <h3>Últimos días</h3>
+      <ul id="expense-history-list" class="expense-history-list"></ul>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="card form-card">
+      <h2>I tuoi dati</h2>
+      <form id="finance-form">
+        <div class="field">
+          <label for="reddito">Reddito mensile (€)</label>
+          <input type="number" id="reddito" min="0" step="1" placeholder="2500" required>
+        </div>
+        <div class="field">
+          <label for="spese">Spese mensili (€)</label>
+          <input type="number" id="spese" min="0" step="1" placeholder="1700" required>
+        </div>
+        <div class="field">
+          <label for="risparmi">Risparmi accumulati (€)</label>
+          <input type="number" id="risparmi" min="0" step="1" placeholder="8000" required>
+        </div>
+
+        <fieldset class="field-group">
+          <legend>Il tuo capitale umano (facoltativo)</legend>
+          <div class="field">
+            <label for="fontiReddito">Da quante fonti indipendenti dipende il tuo reddito?</label>
+            <input type="number" id="fontiReddito" min="0" step="1" placeholder="1">
+          </div>
+          <div class="field">
+            <label for="mesiRicollocazione">Se perdessi il lavoro principale, quanti mesi ti servirebbero per trovare un reddito equivalente?</label>
+            <input type="number" id="mesiRicollocazione" min="0" step="1" placeholder="3">
+          </div>
+          <label class="checkbox-field">
+            <input type="checkbox" id="settoreRischio">
+            Il mio reddito dipende da un settore/tecnologia a rapido cambiamento
+          </label>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>Che assicurazioni hai attive? (facoltativo)</legend>
+          <label class="checkbox-field">
+            <input type="checkbox" id="assicSanitaria">
+            Sanitaria / malattia
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" id="assicCasa">
+            Casa
+          </label>
+          <label class="checkbox-field">
+            <input type="checkbox" id="assicVita">
+            Vita
+          </label>
+        </fieldset>
+
+        <div class="field">
+          <label for="debiti">Debiti totali (€)</label>
+          <input type="number" id="debiti" min="0" step="1" placeholder="15000">
+        </div>
+        <div class="field">
+          <label for="tassoDebito">Tasso medio del debito (% annuo)</label>
+          <input type="number" id="tassoDebito" min="0" step="0.1" placeholder="5.2">
+        </div>
+        <div class="field">
+          <label for="investimenti">Investimenti attuali (€)</label>
+          <input type="number" id="investimenti" min="0" step="1" placeholder="10000">
+        </div>
+
+        <fieldset class="field-group">
+          <legend>Hai una casa con mutuo? (facoltativo)</legend>
+          <div class="field">
+            <label for="valoreCasa">Valore stimato della casa (€)</label>
+            <input type="number" id="valoreCasa" min="0" step="1" placeholder="250000">
+          </div>
+          <div class="field">
+            <label for="mutuoCasa">Mutuo residuo (€)</label>
+            <input type="number" id="mutuoCasa" min="0" step="1" placeholder="200000">
+          </div>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>Come sono ripartiti i tuoi investimenti? (facoltativo, in %)</legend>
+          <div class="field">
+            <label for="allocAzioni">Azioni</label>
+            <input type="number" id="allocAzioni" min="0" max="100" step="1" placeholder="40">
+          </div>
+          <div class="field">
+            <label for="allocObbligazioni">Obbligazioni</label>
+            <input type="number" id="allocObbligazioni" min="0" max="100" step="1" placeholder="20">
+          </div>
+          <div class="field">
+            <label for="allocImmobili">Immobili</label>
+            <input type="number" id="allocImmobili" min="0" max="100" step="1" placeholder="20">
+          </div>
+          <div class="field">
+            <label for="allocCripto">Criptovalute</label>
+            <input type="number" id="allocCripto" min="0" max="100" step="1" placeholder="10">
+          </div>
+          <div class="field">
+            <label for="allocLiquidita">Liquidità / altro</label>
+            <input type="number" id="allocLiquidita" min="0" max="100" step="1" placeholder="10">
+          </div>
+        </fieldset>
+
+        <button type="submit">Analizza la mia situazione</button>
+      </form>
+    </section>
+
+    <section class="results" id="results" hidden>
+      <div class="card">
+        <h2>1. Situazione finanziaria</h2>
+        <div class="stat-row" id="stat-situazione"></div>
+      </div>
+
+      <div class="card">
+        <h2>2. Mappa dei rischi</h2>
+        <p class="explain">La finanza non serve solo a cercare rendimento: serve soprattutto a gestire il rischio. Ecco a colpo d'occhio a quali rischi è esposta la tua vita finanziaria.</p>
+        <div id="mappa-rischi" class="risk-map"></div>
+      </div>
+
+      <div class="card">
+        <h2>3. Livello di liquidità</h2>
+        <div id="liquidita"></div>
+      </div>
+
+      <div class="card">
+        <h2>4. Debito</h2>
+        <div id="debito"></div>
+      </div>
+
+      <div class="card">
+        <h2>5. Capacità di risparmio</h2>
+        <div id="capacita"></div>
+      </div>
+
+      <div class="card">
+        <h2>6. Rischio immobiliare (casa e mutuo)</h2>
+        <p class="explain">Assicuriamo la casa contro incendio e furto, ma raramente contro il calo del suo valore — eppure è un rischio reale: se il mercato scende, il debito del mutuo resta invariato.</p>
+        <div id="immobiliare"></div>
+      </div>
+
+      <div class="card">
+        <h2>7. Rischio capitale umano</h2>
+        <p class="explain">Per molte persone il capitale umano — conoscenze, competenze, capacità di generare reddito futuro — è l'asset più grande che hanno. Ma è spesso concentrato in un solo lavoro o settore, esattamente come un portafoglio con un solo titolo.</p>
+        <div id="capitale-umano"></div>
+      </div>
+
+      <div class="card">
+        <h2>8. Diversificazione degli investimenti</h2>
+        <p class="explain">"Non mettere tutte le uova in un solo paniere": se una categoria di asset pesa troppo, un crollo in quel settore rischia di travolgere tutto il tuo patrimonio.</p>
+        <div id="diversificazione"></div>
+      </div>
+
+      <div class="card">
+        <h2>9. Possibili scenari (proiezione)</h2>
+        <div class="scenario-controls">
+          <label for="rendimento">Rendimento annuo ipotizzato se investi invece di tenere liquido:</label>
+          <input type="range" id="rendimento" min="0" max="10" step="0.5" value="5">
+          <span id="rendimento-value">5%</span>
+        </div>
+        <div id="scenari"></div>
+      </div>
+
+      <div class="card">
+        <h2>10. Potere d'acquisto reale (rischio inflazione)</h2>
+        <p class="explain">Un numero sul conto non cambia nel tempo, ma quello che puoi comprarci sì. Ecco quanto varrebbero oggi i tuoi risparmi tra 10, 20 e 30 anni, sotto diversi scenari di inflazione — e cosa succede invece ai tuoi debiti a tasso fisso.</p>
+        <div id="inflazione"></div>
+      </div>
+
+      <div class="card">
+        <h2>11. Spiegazione dei rischi</h2>
+        <ul id="rischi"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Versione 1 — nessun dato lasciato questo dispositivo. Nessuna consulenza finanziaria: solo educazione e simulazioni.</p>
+  </footer>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
