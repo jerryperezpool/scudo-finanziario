@@ -550,8 +550,11 @@ function renderRischi(data) {
 }
 
 const GASTOS_KEY = 'fincopilot_gastos';
-const GASTOS_CATEGORIAS = {
+const GASTO_CATEGORIAS = {
   Comida: '🍽️', Transporte: '🚌', Ocio: '🎉', Salud: '💊', Casa: '🏠', Otros: '📦',
+};
+const INGRESO_CATEGORIAS = {
+  Salario: '💼', Venta: '🛒', Regalo: '🎁', Otro: '➕',
 };
 
 function todayStr() {
@@ -582,32 +585,49 @@ function fmtEuro(n) {
   return n.toLocaleString('es-ES', { maximumFractionDigits: 2 }) + ' €';
 }
 
+function catIcon(tipo, categoria) {
+  const map = tipo === 'ingreso' ? INGRESO_CATEGORIAS : GASTO_CATEGORIAS;
+  return map[categoria] || (tipo === 'ingreso' ? '➕' : '📦');
+}
+
 function renderGastos() {
   const gastos = loadGastos();
   const hoy = todayStr();
-  const gastosHoy = gastos.filter(g => g.fecha === hoy);
-  const totalHoy = gastosHoy.reduce((s, g) => s + g.importe, 0);
+  const movimientosHoy = gastos.filter(g => g.fecha === hoy);
 
-  document.getElementById('expense-today-total').textContent = fmtEuro(totalHoy);
+  const ingresosHoy = movimientosHoy.filter(g => g.tipo === 'ingreso').reduce((s, g) => s + g.importe, 0);
+  const gastosHoySum = movimientosHoy.filter(g => g.tipo !== 'ingreso').reduce((s, g) => s + g.importe, 0);
+  const balanceHoy = ingresosHoy - gastosHoySum;
+
+  document.getElementById('expense-today-income').textContent = '+' + fmtEuro(ingresosHoy);
+  document.getElementById('expense-today-expense').textContent = '−' + fmtEuro(gastosHoySum);
+  const balanceEl = document.getElementById('expense-today-total');
+  balanceEl.textContent = (balanceHoy >= 0 ? '+' : '−') + fmtEuro(Math.abs(balanceHoy));
+  balanceEl.classList.toggle('positive', balanceHoy >= 0);
+  balanceEl.classList.toggle('negative', balanceHoy < 0);
 
   const listEl = document.getElementById('expense-list');
-  if (gastosHoy.length === 0) {
-    listEl.innerHTML = `<li class="expense-empty">Todavía no has añadido ningún gasto hoy.</li>`;
+  if (movimientosHoy.length === 0) {
+    listEl.innerHTML = `<li class="expense-empty">Todavía no has añadido ningún movimiento hoy.</li>`;
   } else {
-    listEl.innerHTML = gastosHoy.slice().reverse().map(g => `
+    listEl.innerHTML = movimientosHoy.slice().reverse().map(g => {
+      const esIngreso = g.tipo === 'ingreso';
+      return `
       <li>
-        <span class="expense-cat">${GASTOS_CATEGORIAS[g.categoria] || '📦'}</span>
+        <span class="expense-cat">${catIcon(g.tipo, g.categoria)}</span>
         <span class="expense-desc">${escapeHtml(g.descripcion)}</span>
-        <span class="expense-amount">${fmtEuro(g.importe)}</span>
-        <button class="expense-delete" data-id="${g.id}" aria-label="Eliminar gasto" title="Eliminar">✕</button>
+        <span class="expense-amount ${esIngreso ? 'positive' : 'negative'}">${esIngreso ? '+' : '−'}${fmtEuro(g.importe)}</span>
+        <button class="expense-delete" data-id="${g.id}" aria-label="Eliminar movimiento" title="Eliminar">✕</button>
       </li>
-    `).join('');
+    `;
+    }).join('');
   }
 
   const porDia = {};
   gastos.forEach(g => {
     if (g.fecha === hoy) return;
-    porDia[g.fecha] = (porDia[g.fecha] || 0) + g.importe;
+    if (!porDia[g.fecha]) porDia[g.fecha] = 0;
+    porDia[g.fecha] += g.tipo === 'ingreso' ? g.importe : -g.importe;
   });
   const dias = Object.keys(porDia).sort((a, b) => b.localeCompare(a)).slice(0, 6);
   const historyEl = document.getElementById('expense-history-list');
@@ -616,7 +636,9 @@ function renderGastos() {
   } else {
     historyEl.innerHTML = dias.map(fecha => {
       const label = new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-      return `<li><span>${label}</span><span class="value">${fmtEuro(porDia[fecha])}</span></li>`;
+      const neto = porDia[fecha];
+      const cls = neto >= 0 ? 'positive' : 'negative';
+      return `<li><span>${label}</span><span class="value ${cls}">${neto >= 0 ? '+' : '−'}${fmtEuro(Math.abs(neto))}</span></li>`;
     }).join('');
   }
 }
@@ -627,12 +649,30 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+const btnTipoIngreso = document.getElementById('btnTipoIngreso');
+const btnTipoGasto = document.getElementById('btnTipoGasto');
+const expenseTipoActual = document.getElementById('expenseTipoActual');
+const expenseCategoriaGasto = document.getElementById('expenseCategoriaGasto');
+const expenseCategoriaIngreso = document.getElementById('expenseCategoriaIngreso');
+
+function setExpenseTipo(tipo) {
+  expenseTipoActual.value = tipo;
+  btnTipoIngreso.classList.toggle('active', tipo === 'ingreso');
+  btnTipoGasto.classList.toggle('active', tipo === 'gasto');
+  expenseCategoriaIngreso.hidden = tipo !== 'ingreso';
+  expenseCategoriaGasto.hidden = tipo === 'ingreso';
+}
+
+btnTipoIngreso.addEventListener('click', () => setExpenseTipo('ingreso'));
+btnTipoGasto.addEventListener('click', () => setExpenseTipo('gasto'));
+
 const expenseForm = document.getElementById('expense-form');
 expenseForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const importeInput = document.getElementById('expenseImporte');
   const descripcionInput = document.getElementById('expenseDescripcion');
-  const categoriaInput = document.getElementById('expenseCategoria');
+  const tipo = expenseTipoActual.value;
+  const categoriaInput = tipo === 'ingreso' ? expenseCategoriaIngreso : expenseCategoriaGasto;
 
   const importe = Number(importeInput.value);
   const descripcion = descripcionInput.value.trim();
@@ -641,6 +681,7 @@ expenseForm.addEventListener('submit', (e) => {
   const gastos = loadGastos();
   gastos.push({
     id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    tipo,
     importe,
     descripcion,
     categoria: categoriaInput.value,

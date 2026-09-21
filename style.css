@@ -325,6 +325,30 @@ footer {
 
 .expense-card { margin-bottom: 24px; }
 
+.expense-type-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.expense-type-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.expense-type-btn:active { transform: scale(0.98); }
+
+.expense-type-btn.income.active { background: var(--good); border-color: var(--good); color: white; }
+.expense-type-btn.expense.active { background: var(--bad); border-color: var(--bad); color: white; }
+
 .expense-form {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr auto;
@@ -373,6 +397,11 @@ footer {
 
 .expense-total-today .label { color: var(--text-muted); font-size: 0.9rem; }
 .expense-total-today .value { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.expense-total-today .value.positive { color: var(--good); }
+.expense-total-today .value.negative { color: var(--bad); }
+.expense-total-today.expense-balance { border: 1px solid var(--border); }
+.expense-total-today.expense-balance .value.positive { color: var(--good); }
+.expense-total-today.expense-balance .value.negative { color: var(--bad); }
 
 .expense-list {
   list-style: none;
@@ -392,6 +421,8 @@ footer {
 .expense-list .expense-cat { flex-shrink: 0; }
 .expense-list .expense-desc { flex: 1; color: var(--text); }
 .expense-list .expense-amount { font-variant-numeric: tabular-nums; font-weight: 600; }
+.expense-list .expense-amount.positive { color: var(--good); }
+.expense-list .expense-amount.negative { color: var(--bad); }
 
 .expense-list .expense-delete {
   border: none;
@@ -431,3 +462,5 @@ footer {
 }
 
 .expense-history-list .value { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; }
+.expense-history-list .value.positive { color: var(--good); }
+.expense-history-list .value.negative { color: var(--bad); }

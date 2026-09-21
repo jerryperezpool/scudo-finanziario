@@ -39,12 +39,18 @@
 
   <section class="card expense-card">
     <h2>💶 Gastos diarios</h2>
-    <p class="explain">Anota aquí cada gasto del día. Se guardan solo en este dispositivo, para que puedas volver cada día a llevar la cuenta.</p>
+    <p class="explain">Anota aquí cada movimiento del día — ingresos y gastos. Se guardan solo en este dispositivo, para que puedas volver cada día a llevar la cuenta.</p>
+
+    <div class="expense-type-toggle">
+      <button type="button" class="expense-type-btn income" id="btnTipoIngreso" data-tipo="ingreso">+ Ingreso</button>
+      <button type="button" class="expense-type-btn expense active" id="btnTipoGasto" data-tipo="gasto">− Gasto</button>
+    </div>
+    <input type="hidden" id="expenseTipoActual" value="gasto">
 
     <form id="expense-form" class="expense-form">
       <input type="number" id="expenseImporte" min="0" step="0.01" placeholder="Importe (€)" required>
       <input type="text" id="expenseDescripcion" placeholder="Descripción (ej. Café)" required>
-      <select id="expenseCategoria">
+      <select id="expenseCategoriaGasto">
         <option value="Comida">🍽️ Comida</option>
         <option value="Transporte">🚌 Transporte</option>
         <option value="Ocio">🎉 Ocio</option>
@@ -52,12 +58,26 @@
         <option value="Casa">🏠 Casa</option>
         <option value="Otros">📦 Otros</option>
       </select>
+      <select id="expenseCategoriaIngreso" hidden>
+        <option value="Salario">💼 Salario</option>
+        <option value="Venta">🛒 Venta</option>
+        <option value="Regalo">🎁 Regalo</option>
+        <option value="Otro">➕ Otro</option>
+      </select>
       <button type="submit">Añadir</button>
     </form>
 
     <div class="expense-summary">
       <div class="expense-total-today">
-        <span class="label">Total de hoy</span>
+        <span class="label">Ingresos de hoy</span>
+        <span class="value positive" id="expense-today-income">0 €</span>
+      </div>
+      <div class="expense-total-today">
+        <span class="label">Gastos de hoy</span>
+        <span class="value negative" id="expense-today-expense">0 €</span>
+      </div>
+      <div class="expense-total-today expense-balance">
+        <span class="label">Balance de hoy</span>
         <span class="value" id="expense-today-total">0 €</span>
       </div>
     </div>
