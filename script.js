@@ -64,6 +64,7 @@ rendimentoInput.addEventListener('input', () => {
 function render(data) {
   renderSituazione(data);
   renderMappaRischi(data);
+  renderCoach(data);
   renderLiquidita(data);
   renderDebito(data);
   renderCapacita(data);
@@ -481,6 +482,126 @@ function futureValueSeries(principale, contributoMensile, tassoMensile, mesi) {
   const fvPrincipale = principale * Math.pow(1 + tassoMensile, mesi);
   const fvContributi = contributoMensile * ((Math.pow(1 + tassoMensile, mesi) - 1) / tassoMensile);
   return fvPrincipale + fvContributi;
+}
+
+function coachCategories(data) {
+  const liquidita = levelLiquidita(data);
+  const debito = levelDebito(data);
+  const immobiliare = levelImmobiliare(data);
+  const capitaleUmano = levelCapitaleUmano(data);
+  const diversificazione = levelDiversificazione(data);
+  const assicurazione = levelAssicurazione(data);
+  const inflazione = levelInflazione(data);
+
+  return [
+    {
+      icon: '💧', label: 'Fondo di emergenza', cls: liquidita.cls,
+      adviceBad: `Il tuo fondo di emergenza copre solo ${fmt(liquidita.mesi)} mesi di spese, sotto la soglia minima di ${fmt(liquidita.sogliaMin)} mesi consigliata per te. Prima di qualunque altra mossa — investire, ridurre debiti, altro — il tuo obiettivo numero uno dovrebbe essere accantonare liquidità fino a coprire almeno quella soglia.`,
+      adviceWarn: `Il tuo fondo di emergenza (${fmt(liquidita.mesi)} mesi) è nella fascia accettabile ma non ancora ottimale (${fmt(liquidita.sogliaBuona)} mesi). Continua ad alimentarlo prima di aumentare gli investimenti.`,
+      goodNote: 'hai un fondo di emergenza solido',
+    },
+    {
+      icon: '💳', label: 'Debito', cls: debito.cls,
+      adviceBad: `Il debito è il tuo problema più urgente: pesa per il ${fmtPct(debito.rapporto)} del tuo reddito annuo, un livello alto. Prima di aprire nuovi fronti (investimenti, acquisti importanti), costruisci un piano concreto per ridurlo.`,
+      adviceWarn: `Il debito è a un livello da monitorare (${fmtPct(debito.rapporto)} del reddito annuo) — non è un'emergenza, ma valuta se accelerare il rimborso conviene rispetto a risparmiare di più.`,
+      goodNote: 'il debito è sotto controllo',
+    },
+    {
+      icon: '🏠', label: 'Casa e mutuo', cls: immobiliare.cls,
+      adviceBad: immobiliare.level === 'Underwater'
+        ? `Il tuo mutuo residuo supera già il valore stimato della casa: sei "underwater". Non è un'emergenza se non devi vendere ora, ma è un rischio da non ignorare — evita di indebitarti ulteriormente su questo immobile.`
+        : `Il mutuo copre oltre il 90% del valore della casa: hai pochissimo margine. Anche un piccolo calo del mercato immobiliare potrebbe metterti "underwater".`,
+      adviceWarn: `Il mutuo copre una parte consistente del valore della casa (margine ridotto). Non è urgente, ma tienilo d'occhio se il mercato immobiliare della tua zona è instabile.`,
+      goodNote: 'la tua posizione su casa e mutuo è solida',
+    },
+    {
+      icon: '💼', label: 'Capitale umano', cls: capitaleUmano.cls,
+      adviceBad: `Il tuo reddito dipende troppo da un'unica fonte: è il rischio più grande e meno visibile che hai, perché non si vede in un estratto conto. Comincia a costruire una seconda fonte di reddito, anche piccola, o dimensiona il fondo di emergenza tenendo conto di questo rischio in più.`,
+      adviceWarn: `Il tuo capitale umano è moderatamente concentrato: hai un po' di diversificazione nel reddito, ma la perdita di una fonte peserebbe comunque molto. Vale la pena iniziare a pensare a un'alternativa.`,
+      goodNote: 'il tuo reddito è ben diversificato tra più fonti',
+    },
+    {
+      icon: '📈', label: 'Diversificazione investimenti', cls: diversificazione.cls,
+      adviceBad: `I tuoi investimenti sono concentrati per il ${fmtPct(diversificazione.pctMassimo)} in una sola categoria — un problema classico, e per fortuna uno dei più facili da risolvere: basta distribuire su più asset class nel tempo.`,
+      adviceWarn: `Più della metà dei tuoi investimenti è in una sola categoria (${fmtPct(diversificazione.pctMassimo)}). Non è drammatico, ma diversificare ulteriormente ridurrebbe il rischio senza grandi sforzi.`,
+      goodNote: 'i tuoi investimenti sono ben diversificati',
+    },
+    {
+      icon: '🛡️', label: 'Assicurazione', cls: assicurazione.cls,
+      adviceBad: `Non hai nessuna assicurazione attiva: un imprevisto medico o un danno alla casa dovrebbe essere assorbito interamente dai tuoi risparmi. Valuta almeno una copertura sanitaria di base — è spesso il modo più economico di ridurre il rischio complessivo.`,
+      adviceWarn: `Hai una copertura assicurativa parziale. Guarda cosa manca (sanitaria, casa, vita) e valuta se completarla in base a chi dipende economicamente da te.`,
+      goodNote: 'hai una buona copertura assicurativa',
+    },
+    {
+      icon: '💶', label: 'Inflazione', cls: inflazione.cls,
+      adviceBad: `Tieni troppa liquidità ferma rispetto a quanto hai investito: nel tempo l'inflazione ne eroderà silenziosamente il potere d'acquisto. Una volta a posto con il fondo di emergenza, valuta di investire la liquidità in eccesso.`,
+      adviceWarn: `Una parte della tua liquidità è esposta all'inflazione nel lungo periodo. Non è urgente, ma tienilo presente quando decidi dove tenere i risparmi in eccesso.`,
+      goodNote: 'gestisci bene il rischio inflazione',
+    },
+  ];
+}
+
+function renderCoach(data) {
+  const categorie = coachCategories(data);
+  const valide = categorie.filter(c => c.cls !== 'neutral');
+  const bad = valide.filter(c => c.cls === 'bad');
+  const warn = valide.filter(c => c.cls === 'warn');
+  const buone = valide.filter(c => c.cls === 'good');
+  const mancanti = categorie.filter(c => c.cls === 'neutral');
+
+  const el = document.getElementById('coach');
+
+  if (valide.length === 0) {
+    el.innerHTML = `<p class="explain">Compila più campi del modulo (fondo di emergenza, debiti, investimenti...) per ricevere qui un piano d'azione personalizzato.</p>`;
+    return;
+  }
+
+  let html = '';
+
+  if (bad.length === 0 && warn.length === 0) {
+    html += `<p class="coach-lead good">✅ Ottimo lavoro. In base ai dati che hai inserito non emergono rischi urgenti — la tua situazione finanziaria è su basi solide.</p>`;
+  } else {
+    const priorita = bad.length > 0 ? bad : warn.slice(0, 1);
+    const restanti = bad.length > 0 ? warn : warn.slice(1);
+
+    html += `<div class="coach-priority">
+      <div class="coach-priority-label">${priorita.length > 1 ? 'Le tue priorità ora' : 'La tua priorità ora'}</div>
+      ${priorita.map(c => `
+        <div class="coach-item ${c.cls}">
+          <span class="coach-icon">${c.icon}</span>
+          <div>
+            <div class="coach-item-label">${c.label}</div>
+            <p>${c.cls === 'bad' ? c.adviceBad : c.adviceWarn}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+
+    if (restanti.length > 0) {
+      html += `<div class="coach-secondary">
+        <div class="coach-priority-label">Da tenere d'occhio</div>
+        ${restanti.map(c => `
+          <div class="coach-item ${c.cls}">
+            <span class="coach-icon">${c.icon}</span>
+            <div>
+              <div class="coach-item-label">${c.label}</div>
+              <p>${c.cls === 'bad' ? c.adviceBad : c.adviceWarn}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+  }
+
+  if (buone.length > 0) {
+    html += `<p class="coach-good-summary">👍 Cosa hai già sotto controllo: ${buone.map(c => c.goodNote).join('; ')}.</p>`;
+  }
+
+  if (mancanti.length > 0) {
+    html += `<p class="explain" style="margin-top:10px;">Dati mancanti per un piano ancora più preciso: ${mancanti.map(c => c.label.toLowerCase()).join(', ')}.</p>`;
+  }
+
+  el.innerHTML = html;
 }
 
 function renderRischi(data) {

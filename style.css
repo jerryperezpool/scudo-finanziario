@@ -316,6 +316,53 @@ table.scenario-table th { color: var(--text-muted); font-weight: 600; }
 #rischi li.warn { color: var(--warn); }
 #rischi li.bad { color: var(--bad); }
 
+.coach-card { border: 2px solid var(--accent); }
+
+.coach-lead {
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+.coach-lead.good { color: var(--good); font-weight: 600; }
+
+.coach-priority-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 14px 0 8px;
+}
+
+.coach-priority .coach-priority-label:first-child { margin-top: 0; }
+
+.coach-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.coach-item.bad { background: var(--bad-bg); }
+.coach-item.warn { background: var(--warn-bg); }
+
+.coach-item .coach-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1.3; }
+
+.coach-item-label { font-weight: 700; margin-bottom: 3px; }
+.coach-item.bad .coach-item-label { color: var(--bad); }
+.coach-item.warn .coach-item-label { color: var(--warn); }
+
+.coach-item p { margin: 0; color: var(--text); font-size: 0.92rem; line-height: 1.5; }
+
+.coach-good-summary {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 footer {
   text-align: center;
   color: var(--text-muted);
